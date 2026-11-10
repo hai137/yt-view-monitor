@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""境外节点只读诊断二：从真实响应里抠出播放量字段原文。
+"""境外节点只读诊断三：精确字段 + 公共镜像。
 
 不回传数据、不修改看板快照。
 """
@@ -22,14 +22,10 @@ BASE = {"User-Agent": UA,
         "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"}
 TZ = timezone(timedelta(hours=8))
 res = {"run_at": datetime.now(TZ).isoformat(timespec="seconds"),
-       "diag": 2, "ok": False, "tests": {}}
-
-KEYS = ("viewCount", "viewCountText", "shortViewCountText",
-        "videoViewCountRenderer", "interactionCount",
-        "playabilityStatus", "videoDetails")
+       "diag": 3, "ok": False, "fields": {}, "mirrors": {}}
 
 
-def fetch(url, data=None, headers=None, timeout=18):
+def fetch(url, data=None, headers=None, timeout=10):
     h = dict(BASE)
     if headers:
         h.update(headers)
@@ -43,51 +39,65 @@ def fetch(url, data=None, headers=None, timeout=18):
         return r.status, r.read().decode("utf-8", "replace")
 
 
-def inspect(name, fn):
-    try:
-        status, body = fn()
-        item = {"ok": True, "status": status, "len": len(body)}
-        for kw in KEYS:
-            n = body.count(kw)
-            if not n:
-                continue
-            ctx = []
-            for m in list(re.finditer(re.escape(kw), body))[:2]:
-                i = m.start()
-                ctx.append(body[max(0, i - 110):i + 230].replace("\n", " "))
-            item[kw] = {"count": n, "ctx": ctx}
-        digits = re.findall(r'"viewCount"\s*:\s*"(\d+)"', body)
-        if digits:
-            item["EXACT_VIEWCOUNT"] = digits[:3]
-        res["tests"][name] = item
-    except Exception as e:
-        res["tests"][name] = {"ok": False,
-                              "error": type(e).__name__ + ": " + str(e)[:170]}
-
-
 web = {"context": {"client": {
     "clientName": "WEB", "clientVersion": "2.20241101.00.00",
     "hl": "zh-CN", "gl": "TW"}}}
-android = {"context": {"client": {
-    "clientName": "ANDROID", "clientVersion": "20.10.38",
-    "androidSdkVersion": 30, "hl": "zh-CN", "gl": "US"}}}
 
-inspect("next_web", lambda: fetch(
-    "https://www.youtube.com/youtubei/v1/next?key=" + KEY,
-    data=dict(web, videoId=VID, contentCheckOk=True, racyCheckOk=True),
-    headers={"Origin": "https://www.youtube.com"}))
-inspect("next_android", lambda: fetch(
-    "https://www.youtube.com/youtubei/v1/next?key=" + KEY,
-    data=dict(android, videoId=VID, contentCheckOk=True,
-              racyCheckOk=True)))
-inspect("m_watch", lambda: fetch(
-    "https://m.youtube.com/watch?v=" + VID + "&hl=zh-CN"))
-inspect("watch_verified", lambda: fetch(
-    "https://www.youtube.com/watch?v=" + VID
-    + "&bpctr=9999999999&has_verified=1&hl=zh-CN"))
-inspect("nocookie_embed", lambda: fetch(
-    "https://www.youtube-nocookie.com/embed/" + VID + "?hl=zh-CN"))
+try:
+    _, body = fetch(
+        "https://www.youtube.com/youtubei/v1/next?key=" + KEY,
+        data=dict(web, videoId=VID, contentCheckOk=True,
+                  racyCheckOk=True),
+        headers={"Origin": "https://www.youtube.com"}, timeout=20)
+    res["fields"]["len"] = len(body)
+    for kw in ("videoViewCountRenderer", "viewCountFactoidRenderer",
+               '"viewCount"', "shortViewCountText"):
+        hits = list(re.finditer(re.escape(kw), body))
+        res["fields"][kw] = {
+            "count": len(hits),
+            "ctx": [body[max(0, m.start() - 130):m.start() + 260]
+                    .replace("\n", " ") for m in hits[:5]],
+        }
+    exact = re.findall(
+        r'"viewCount"\s*:\s*"?([\d,]{4,})', body)
+    res["fields"]["numeric_candidates"] = exact[:8]
+    res["fields"]["chinese_counts"] = re.findall(
+        r'([\d,]{4,})\s*(?:次觀看|次观看|views)', body)[:8]
+except Exception as e:
+    res["fields"]["error"] = type(e).__name__ + ": " + str(e)[:170]
+
+MIRRORS = (
+    ("inv_nadeko", "https://inv.nadeko.net/api/v1/videos/" + VID),
+    ("yewtu", "https://yewtu.be/api/v1/videos/" + VID),
+    ("inv_private_coffee",
+     "https://invidious.private.coffee/api/v1/videos/" + VID),
+    ("inv_projectsegfau",
+     "https://inv.us.projectsegfau.lt/api/v1/videos/" + VID),
+    ("inv_nerdvpn",
+     "https://invidious.nerdvpn.de/api/v1/videos/" + VID),
+    ("piped_adminforge",
+     "https://pipedapi.adminforge.de/streams/" + VID),
+    ("piped_kavin",
+     "https://pipedapi.kavin.rocks/streams/" + VID),
+    ("piped_reallyawesome",
+     "https://pipedapi.reallyaweso.me/streams/" + VID),
+    ("piped_darkness",
+     "https://pipedapi-libre.kavin.rocks/streams/" + VID),
+)
+
+for name, url in MIRRORS:
+    try:
+        status, text = fetch(url, timeout=9)
+        vc = re.findall(r'"viewCount"\s*:\s*"?(\d+)', text)
+        res["mirrors"][name] = {
+            "ok": True, "status": status, "len": len(text),
+            "viewCount": vc[:2], "head": text[:130].replace("\n", " "),
+        }
+    except Exception as e:
+        res["mirrors"][name] = {
+            "ok": False, "error": type(e).__name__ + ": " + str(e)[:110],
+        }
 
 (ROOT / "status.json").write_text(
     json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
-print("diag2 done", len(json.dumps(res, ensure_ascii=False)))
+print("diag3 done", len(json.dumps(res, ensure_ascii=False)))
