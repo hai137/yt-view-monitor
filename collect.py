@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """境外节点采集真实播放量，回传给云端看板服务渲染。
 
-优先用 yt-dlp（自动处理 YouTube 反爬与多客户端），失败再回退到
-youtubei/v1/browse + player 多客户端。抓不到的数据跳过，绝不填估算值。
+视频列表来自 youtubei/v1/browse，播放量依次尝试多个官方 player 客户端
+（含 ANDROID_VR）与 watch/embed 页面；抓不到就跳过，绝不填估算值。
 """
 
 from __future__ import annotations
@@ -11,10 +11,10 @@ from __future__ import annotations
 import json
 import os
 import re
-import subprocess
 import sys
 import urllib.parse
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, wait
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -25,15 +25,32 @@ KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/122.0 Safari/537.36")
 HEADERS = {"User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"}
-status = {
-    "run_at": datetime.now(timezone(timedelta(hours=8))).isoformat(timespec="seconds"),
-    "ok": False, "secret_set": bool(code), "channels": {},
-}
-opener = urllib.request.build_opener()
 TZ = timezone(timedelta(hours=8))
+opener = urllib.request.build_opener()
+status = {
+    "run_at": datetime.now(TZ).isoformat(timespec="seconds"),
+    "ok": False, "secret_set": bool(code), "client_hits": {}, "channels": {},
+}
+
+CLIENTS = (
+    ("ANDROID_VR", "1.60.19",
+     {"androidSdkVersion": 32, "hl": "zh-CN", "gl": "US"}),
+    ("TVHTML5_SIMPLY_EMBEDDED_PLAYER", "2.0",
+     {"clientScreen": "EMBED", "hl": "zh-CN", "gl": "US"}),
+    ("WEB_EMBEDDED_PLAYER", "1.20241009.01.00",
+     {"clientScreen": "EMBED", "hl": "zh-CN", "gl": "TW"}),
+    ("ANDROID", "20.10.38",
+     {"androidSdkVersion": 30, "hl": "zh-CN", "gl": "US"}),
+    ("IOS", "20.10.4",
+     {"deviceMake": "Apple", "deviceModel": "iPhone16,2",
+      "osName": "iPhone", "osVersion": "18.3.1.22D72",
+      "hl": "zh-CN", "gl": "US"}),
+    ("TVHTML5", "7.20241101.18.00", {"hl": "zh-CN", "gl": "US"}),
+    ("WEB", "2.20241101.00.00", {"hl": "zh-CN", "gl": "TW"}),
+)
 
 
-def http(url, data=None, extra=None, timeout=20) -> bytes:
+def http(url, data=None, extra=None, timeout=15) -> bytes:
     h = dict(HEADERS)
     if extra:
         h.update(extra)
@@ -43,64 +60,57 @@ def http(url, data=None, extra=None, timeout=20) -> bytes:
         return r.read()
 
 
-def iso_from_unix(ts) -> str:
-    try:
-        return datetime.fromtimestamp(float(ts), TZ).isoformat(timespec="seconds")
-    except Exception:
+def parse_browse(raw: bytes) -> list:
+    data = json.loads(raw.decode("utf-8", "replace"))
+    out, seen = [], set()
+
+    def walk(node):
+        if isinstance(node, dict):
+            vr = node.get("videoRenderer") or node.get("gridVideoRenderer")
+            if vr and vr.get("videoId"):
+                vid = vr["videoId"]
+                title = ("".join(r.get("text", "") for r in
+                                 vr.get("title", {}).get("runs", []))
+                         or vr.get("title", {}).get("simpleText", ""))
+                pub = (vr.get("publishedTimeText", {}).get("simpleText", "")
+                       or "")
+                if vid not in seen:
+                    seen.add(vid)
+                    out.append({"id": vid, "title": title or "(无标题)",
+                                "pub": pub})
+            for v in node.values():
+                walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+
+    walk(data)
+    return out[:15]
+
+
+def approx_time(txt: str) -> str:
+    if not txt:
         return ""
-
-
-def iso_from_date(s: str) -> str:
-    try:
-        return datetime.strptime(s, "%Y%m%d").replace(tzinfo=TZ).isoformat(
-            timespec="seconds")
-    except Exception:
+    m = re.search(r"(\d+)\s*(天|日|小時|小时|週|周|個月|个月|年|分|分鐘|分钟)", txt)
+    if not m:
         return ""
+    n, unit = int(m.group(1)), m.group(2)
+    if unit in ("天", "日"):
+        delta = timedelta(days=n)
+    elif unit in ("週", "周"):
+        delta = timedelta(weeks=n)
+    elif unit in ("個月", "个月"):
+        delta = timedelta(days=30 * n)
+    elif unit == "年":
+        delta = timedelta(days=365 * n)
+    elif unit in ("小時", "小时"):
+        delta = timedelta(hours=n)
+    else:
+        delta = timedelta(minutes=n)
+    return (datetime.now(TZ) - delta).isoformat(timespec="seconds")
 
 
-def ensure_ytdlp():
-    try:
-        import yt_dlp
-        return yt_dlp
-    except ImportError:
-        subprocess.check_call([sys.executable, "-m", "pip", "install",
-                               "--quiet", "yt-dlp"], timeout=180)
-        import yt_dlp
-        return yt_dlp
-
-
-CLIENT_SETS = (("android_vr",), ("tv_embedded",), ("web_safari",),
-               ("android", "web"), ("web",))
-
-
-def via_ytdlp(cid, ydl_mod):
-    last = ""
-    for clients in CLIENT_SETS:
-        opts = {
-            "quiet": True, "no_warnings": True, "skip_download": True,
-            "playlistend": 15, "ignoreerrors": True, "noplaylist": False,
-            "extract_flat": False,
-            "extractor_args": {"youtube": {"player_client": list(clients)}},
-        }
-        try:
-            with ydl_mod.YoutubeDL(opts) as ydl:
-                info = ydl.extract_info(
-                    f"https://www.youtube.com/channel/{cid}/videos",
-                    download=False)
-            entries = [e for e in (info or {}).get("entries", []) if e][:15]
-            good = sum(1 for e in entries if isinstance(e.get("view_count"), int))
-            status["channels"].setdefault(cid, {})["ytdlp:" + "+".join(clients)] = \
-                f"{len(entries)} entries / {good} views"
-            if entries and good:
-                return entries, info or {}
-        except Exception as e:
-            last = f"{type(e).__name__}: {str(e)[:100]}"
-            status["channels"].setdefault(cid, {})["ytdlp:" + "+".join(clients)] = last
-    raise RuntimeError("yt-dlp 未能取得播放量" + (f"：{last}" if last else ""))
-
-
-def via_browse(cid):
-    """回退：browse 拿列表，player 多客户端 / watch / embed 拿播放量。"""
+def browse_entries(cid: str) -> list:
     body = json.dumps({
         "context": {"client": {"clientName": "WEB",
                                "clientVersion": "2.20241101.00.00",
@@ -110,89 +120,90 @@ def via_browse(cid):
     raw = http("https://www.youtube.com/youtubei/v1/browse?key=" + KEY,
                data=body, extra={"Content-Type": "application/json",
                                  "Origin": "https://www.youtube.com"},
-               timeout=25).decode("utf-8", "replace")
-    ids, seen = [], set()
-    for m in re.finditer(r'"videoId"\s*:\s*"([A-Za-z0-9_-]{11})"', raw):
-        v = m.group(1)
-        if v not in seen:
-            seen.add(v)
-            ids.append(v)
-    ids = ids[:15]
-    if not ids:
-        raise RuntimeError("browse 未返回 videoId")
-    import scraper
-    from concurrent.futures import ThreadPoolExecutor, wait
-    out = []
-    pool = ThreadPoolExecutor(max_workers=8)
-    try:
-        fs = {pool.submit(scraper.views_for, opener, v, KEY): v for v in ids}
-        done, pending = wait(fs, timeout=150)
-        for f in pending:
-            f.cancel()
-        for f in done:
-            try:
-                vid, n = f.result()
-            except Exception:
-                continue
-            if isinstance(n, int) and n >= 0:
-                out.append({"id": vid, "title": "(无标题)", "view_count": n})
-    finally:
-        pool.shutdown(wait=False, cancel_futures=True)
-    status["channels"].setdefault(cid, {})["browse"] = \
-        f"{len(ids)} ids / {len(out)} views"
-    return out, {}
+               timeout=25)
+    return parse_browse(raw)
+
+
+def one_view(vid: str):
+    for name, ver, extra in CLIENTS:
+        client = {"clientName": name, "clientVersion": ver}
+        client.update(extra)
+        body = json.dumps({
+            "context": {"client": client},
+            "videoId": vid, "contentCheckOk": True, "racyCheckOk": True,
+        }).encode()
+        try:
+            raw = http("https://www.youtube.com/youtubei/v1/player?key=" + KEY,
+                       data=body, extra={"Content-Type": "application/json",
+                                         "Origin": "https://www.youtube.com"},
+                       timeout=12)
+            d = json.loads(raw.decode("utf-8", "replace"))
+            v = d.get("videoDetails", {}).get("viewCount")
+            if v and str(v).isdigit():
+                return vid, int(v), name
+        except Exception:
+            continue
+    for kind, url in (("watch", f"https://www.youtube.com/watch?v={vid}&hl=zh-CN"),
+                      ("embed", f"https://www.youtube.com/embed/{vid}?hl=zh-CN")):
+        try:
+            txt = http(url, timeout=14).decode("utf-8", "replace")
+            m = re.search(r'"viewCount"\s*:\s*"(\d+)"', txt)
+            if m:
+                return vid, int(m.group(1)), kind
+        except Exception:
+            continue
+    return vid, None, "none"
 
 
 try:
     if not code:
         raise RuntimeError("缺少 SHARE_CODE 环境变量，请在仓库 Secrets 中配置")
-    try:
-        ydl_mod = ensure_ytdlp()
-    except Exception as e:
-        ydl_mod = None
-        status["ytdlp_install"] = f"{type(e).__name__}: {str(e)[:100]}"
-
-    channels, videos, views, subs = {}, {}, {}, {}
+    channels, videos, subs = {}, {}, {}
+    jobs = []
     for e in [x for x in cfg["channels"] if x.get("channel_id")]:
         cid = e["channel_id"].strip()
-        if ydl_mod:
-            try:
-                entries, info = via_ytdlp(cid, ydl_mod)
-                source = "ytdlp"
-            except Exception as ex:
-                status["channels"].setdefault(cid, {})["ytdlp"] = \
-                    f"FAIL {type(ex).__name__}: {str(ex)[:100]}"
-                entries, info = via_browse(cid)
-                source = "browse"
-        else:
-            entries, info = via_browse(cid)
-            source = "browse"
-        print(f"  {e['name']}：{len(entries)} 条，来源 {source}", flush=True)
+        entries = browse_entries(cid)
+        status["channels"][cid] = f"browse {len(entries)}"
+        print(f"  {e['name']}：browse {len(entries)} 条", flush=True)
+        if not entries:
+            raise RuntimeError(f"频道 {e['name']} 的视频列表为空")
         channels[cid] = {
             "name": e["name"],
             "handle": (e.get("handle") or "").lstrip("@"),
-            "subscribers": int(info.get("channel_follower_count") or 0),
+            "subscribers": 0,
             "channelViews": "",
         }
-        subs[cid] = channels[cid]["subscribers"]
+        subs[cid] = 0
         for x in entries:
-            vid = x.get("id")
-            n = x.get("view_count")
-            if not vid or not isinstance(n, int) or n < 0:
-                continue
-            ts = (iso_from_unix(x.get("timestamp"))
-                  or iso_from_date(x.get("upload_date") or ""))
-            videos[vid] = {
-                "id": vid, "title": x.get("title") or "(无标题)",
-                "publishedAt": ts,
-                "url": "https://www.youtube.com/watch?v=" + vid,
+            videos[x["id"]] = {
+                "id": x["id"], "title": x["title"],
+                "publishedAt": approx_time(x["pub"]),
+                "url": "https://www.youtube.com/watch?v=" + x["id"],
                 "channelId": cid, "duration": "",
             }
-            views[vid] = n
+            jobs.append(x["id"])
 
+    views = {}
+    pool = ThreadPoolExecutor(max_workers=8)
+    try:
+        fs = {pool.submit(one_view, v): v for v in jobs}
+        done, pending = wait(fs, timeout=210)
+        for f in pending:
+            f.cancel()
+        for f in done:
+            try:
+                vid, n, src = f.result()
+            except Exception:
+                continue
+            status["client_hits"][src] = status["client_hits"].get(src, 0) + 1
+            if isinstance(n, int) and n >= 0:
+                views[vid] = n
+    finally:
+        pool.shutdown(wait=False, cancel_futures=True)
+
+    print(f"  播放量 {len(views)}/{len(jobs)}", flush=True)
     if not views:
         raise RuntimeError("所有视频播放量都抓取失败，本次不回传")
-    print(f"  共取得 {len(views)} 条精确播放量", flush=True)
 
     payload = {"channels": channels, "videos": videos,
                "views": views, "subs": subs, "code": code}
