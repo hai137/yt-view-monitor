@@ -1,0 +1,11 @@
+{
+  "proxy": "",
+  "cloud_mode": true,
+  "timezone_offset_hours": 8,
+  "channels": [
+    { "name": "小羊看世界", "handle": "SheepWorld-1", "channel_id": "UC_AglC5rzoBquyI3HYWHGyQ" },
+    { "name": "生活有趣事", "handle": "Good-Happen", "channel_id": "UCmaMFmdJPY47IdGvCo3jSjw" },
+    { "name": "小小快乐星球", "handle": "小小快樂星球", "channel_id": "UCam5YvQCGc_18jERc34XGxQ" }
+  ],
+  "push_url": "https://yt-view-monitor.app.workbuddy.host/push"
+}
