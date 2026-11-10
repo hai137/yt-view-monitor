@@ -1,1 +1,1 @@
-{"ok": false, "error": "等待 GitHub Actions 首次运行"}
+{"run_at": "2026-11-10T10:42:44+08:00", "ok": false, "error": "HTTPError: HTTP Error 404: Not Found"}
