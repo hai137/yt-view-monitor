@@ -1,241 +1,125 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""境外节点采集真实播放量，回传给云端看板服务渲染。
+"""境外节点只读诊断：寻找无需住宅代理即可取得精确播放量的通道。
 
-视频列表来自 youtubei/v1/browse，播放量先探测一个能用的官方 player
-客户端（含 ANDROID_VR）再并发抓取，失败回退 watch/embed 页面。
-抓不到的数据跳过，绝不填估算值。
+本版本不回传任何数据、不修改看板快照。
 """
 
 from __future__ import annotations
 
 import json
-import os
 import re
-import sys
-import urllib.parse
 import urllib.request
-from concurrent.futures import ThreadPoolExecutor, wait
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
-code = os.environ.get("SHARE_CODE", "").strip()
+VID = "PeSNnT69zd8"
+CID = "UC_AglC5rzoBquyI3HYWHGyQ"
 KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
-PLAYER = "https://www.youtube.com/youtubei/v1/player?key=" + KEY
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/122.0 Safari/537.36")
-HEADERS = {"User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"}
+BASE = {"User-Agent": UA,
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"}
 TZ = timezone(timedelta(hours=8))
-opener = urllib.request.build_opener()
-status = {
+
+res = {
     "run_at": datetime.now(TZ).isoformat(timespec="seconds"),
-    "ok": False, "secret_set": bool(code), "channels": {}, "client_hits": {},
+    "diag": True,
+    "ok": False,
+    "tests": {},
 }
 
-CLIENTS = (
-    ("ANDROID_VR", "1.60.19",
-     {"androidSdkVersion": 32, "hl": "zh-CN", "gl": "US"}),
-    ("TVHTML5_SIMPLY_EMBEDDED_PLAYER", "2.0",
-     {"clientScreen": "EMBED", "hl": "zh-CN", "gl": "US"}),
-    ("WEB_EMBEDDED_PLAYER", "1.20241009.01.00",
-     {"clientScreen": "EMBED", "hl": "zh-CN", "gl": "TW"}),
-    ("ANDROID", "20.10.38",
-     {"androidSdkVersion": 30, "hl": "zh-CN", "gl": "US"}),
-    ("IOS", "20.10.4",
-     {"deviceMake": "Apple", "deviceModel": "iPhone16,2",
-      "osName": "iPhone", "osVersion": "18.3.1.22D72",
-      "hl": "zh-CN", "gl": "US"}),
-    ("TVHTML5", "7.20241101.18.00", {"hl": "zh-CN", "gl": "US"}),
-    ("WEB", "2.20241101.00.00", {"hl": "zh-CN", "gl": "TW"}),
-)
 
-
-def http(url, data=None, extra=None, timeout=15) -> bytes:
-    h = dict(HEADERS)
-    if extra:
-        h.update(extra)
-    req = urllib.request.Request(url, data=data, headers=h,
-                                 method="POST" if data is not None else "GET")
-    with opener.open(req, timeout=timeout) as r:
-        return r.read()
-
-
-def parse_browse(raw: bytes) -> list:
-    text = raw.decode("utf-8", "replace")
-    out, seen = [], set()
-    try:
-        data = json.loads(text)
-
-        def walk(node):
-            if isinstance(node, dict):
-                vr = node.get("videoRenderer") or node.get("gridVideoRenderer")
-                if vr and vr.get("videoId"):
-                    vid = vr["videoId"]
-                    title = ("".join(r.get("text", "") for r in
-                                     vr.get("title", {}).get("runs", []))
-                             or vr.get("title", {}).get("simpleText", ""))
-                    if vid not in seen:
-                        seen.add(vid)
-                        out.append({"id": vid, "title": title or "", "pub": ""})
-                for v in node.values():
-                    walk(v)
-            elif isinstance(node, list):
-                for v in node:
-                    walk(v)
-        walk(data)
-    except Exception:
-        pass
-    if not out:
-        for m in re.finditer(r'"videoId"\s*:\s*"([A-Za-z0-9_-]{11})"', text):
-            vid = m.group(1)
-            if vid not in seen:
-                seen.add(vid)
-                out.append({"id": vid, "title": "", "pub": ""})
-    return out[:15]
-
-
-def browse_entries(cid: str) -> list:
-    body = json.dumps({
-        "context": {"client": {"clientName": "WEB",
-                               "clientVersion": "2.20241101.00.00",
-                               "hl": "zh-CN", "gl": "TW"}},
-        "browseId": cid,
-    }).encode()
-    raw = http("https://www.youtube.com/youtubei/v1/browse?key=" + KEY,
-               data=body, extra={"Content-Type": "application/json",
-                                 "Origin": "https://www.youtube.com"},
-               timeout=25)
-    return parse_browse(raw)
-
-
-def try_client(vid, client_tuple):
-    name, ver, extra = client_tuple
-    client = {"clientName": name, "clientVersion": ver}
-    client.update(extra)
-    body = json.dumps({
-        "context": {"client": client},
-        "videoId": vid, "contentCheckOk": True, "racyCheckOk": True,
-    }).encode()
-    raw = http(PLAYER, data=body,
-               extra={"Content-Type": "application/json",
-                      "Origin": "https://www.youtube.com"}, timeout=12)
-    d = json.loads(raw.decode("utf-8", "replace"))
-    v = d.get("videoDetails", {}).get("viewCount")
-    return int(v) if v and str(v).isdigit() else None
-
-
-def find_client(vid):
-    for c in CLIENTS:
-        try:
-            n = try_client(vid, c)
-            if n is not None:
-                return c, n
-        except Exception:
-            continue
-    return None, None
-
-
-def one_view(vid, best):
-    if best:
-        try:
-            n = try_client(vid, best)
-            if n is not None:
-                return vid, n, best[0]
-        except Exception:
-            pass
-    for kind, url in (("watch", f"https://www.youtube.com/watch?v={vid}&hl=zh-CN"),
-                      ("embed", f"https://www.youtube.com/embed/{vid}?hl=zh-CN")):
-        try:
-            txt = http(url, timeout=14).decode("utf-8", "replace")
-            m = re.search(r'"viewCount"\s*:\s*"(\d+)"', txt)
-            if m:
-                return vid, int(m.group(1)), kind
-        except Exception:
-            continue
-    return vid, None, "none"
-
-
-try:
-    if not code:
-        raise RuntimeError("缺少 SHARE_CODE 环境变量，请在仓库 Secrets 中配置")
-    channels, videos, subs = {}, {}, {}
-    jobs = []
-    for e in [x for x in cfg["channels"] if x.get("channel_id")]:
-        cid = e["channel_id"].strip()
-        entries = browse_entries(cid)
-        status["channels"][cid] = f"browse {len(entries)}"
-        print(f"  {e['name']}：browse {len(entries)} 条", flush=True)
-        if not entries:
-            raise RuntimeError(f"频道 {e['name']} 的视频列表为空")
-        channels[cid] = {
-            "name": e["name"],
-            "handle": (e.get("handle") or "").lstrip("@"),
-            "subscribers": 0, "channelViews": "",
-        }
-        subs[cid] = 0
-        for x in entries:
-            videos[x["id"]] = {
-                "id": x["id"], "title": x["title"], "publishedAt": "",
-                "url": "https://www.youtube.com/watch?v=" + x["id"],
-                "channelId": cid, "duration": "",
-            }
-            jobs.append(x["id"])
-
-    views = {}
-    best, first_n = find_client(jobs[0])
-    status["best_client"] = best[0] if best else "none"
-    print("  播放量客户端：", status["best_client"], flush=True)
-    if first_n is not None:
-        views[jobs[0]] = first_n
-        status["client_hits"][best[0]] = 1
-    rest = jobs[1:] if first_n is not None else jobs
-    pool = ThreadPoolExecutor(max_workers=8)
-    try:
-        fs = {pool.submit(one_view, v, best): v for v in rest}
-        done, pending = wait(fs, timeout=200)
-        for f in pending:
-            f.cancel()
-        for f in done:
-            try:
-                vid, n, src = f.result()
-            except Exception:
-                continue
-            status["client_hits"][src] = status["client_hits"].get(src, 0) + 1
-            if isinstance(n, int) and n >= 0:
-                views[vid] = n
-    finally:
-        pool.shutdown(wait=False, cancel_futures=True)
-
-    print(f"  播放量 {len(views)}/{len(jobs)}", flush=True)
-    if not views:
-        raise RuntimeError("所有视频播放量都抓取失败，本次不回传")
-
-    payload = {"channels": channels, "videos": videos,
-               "views": views, "subs": subs, "code": code}
-    push_url = cfg["push_url"] + "?sharecode=" + urllib.parse.quote(code, safe="")
+def fetch(url, data=None, headers=None, timeout=14):
+    h = dict(BASE)
+    if headers:
+        h.update(headers)
+    if isinstance(data, (dict, list)):
+        data = json.dumps(data).encode("utf-8")
+        h.setdefault("Content-Type", "application/json")
     req = urllib.request.Request(
-        push_url,
-        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={"Content-Type": "application/json",
-                 "User-Agent": "yt-monitor/1.0",
-                 "X-Share-Code": code},
-        method="POST")
-    with urllib.request.urlopen(req, timeout=45) as r:
-        body = r.read(2000).decode("utf-8", "replace")
-        if r.status != 200:
-            raise RuntimeError(f"回传失败 HTTP {r.status}: {body[:200]}")
-    status.update({"ok": True, "videos": len(videos),
-                   "views": len(views), "response": body[:200]})
-    print(f"OK：{len(views)} 条真实播放量已回传")
-except Exception as e:
-    url = getattr(e, "url", "") or ""
-    where = urllib.parse.urlparse(url).path if url else ""
-    status["error"] = (f"{type(e).__name__}: {str(e)[:160]}"
-                       + (f" @ {where}" if where else ""))
-    print("FAILED:", status["error"], flush=True)
+        url, data=data, headers=h,
+        method="POST" if data is not None else "GET")
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.status, r.read().decode("utf-8", "replace")
+
+
+def test(name, fn):
+    try:
+        status, body = fn()
+        item = {"ok": True, "status": status,
+                "len": len(body),
+                "head": body[:220].replace("\n", " ")}
+        counts = re.findall(r'"viewCount"\s*:\s*"(\d+)"', body)
+        if counts:
+            item["viewCount"] = counts[:3]
+        texts = re.findall(
+            r'"viewCountText"\s*:\s*\{\s*"simpleText"\s*:\s*"([^"]+)"', body)
+        if texts:
+            item["viewCountText"] = texts[:3]
+        res["tests"][name] = item
+    except Exception as e:
+        res["tests"][name] = {
+            "ok": False,
+            "error": type(e).__name__ + ": " + str(e)[:170],
+        }
+
+
+v3 = ("https://www.googleapis.com/youtube/v3/videos"
+      "?part=statistics&id=" + VID + "&key=" + KEY)
+v3_multi = ("https://www.googleapis.com/youtube/v3/videos"
+            "?part=statistics&id=" + VID + ",PeSNnT69zd8&key=" + KEY)
+
+test("egress_ip", lambda: fetch("https://api.ipify.org?format=json"))
+test("v3_plain", lambda: fetch(v3))
+test("v3_referer", lambda: fetch(
+    v3, headers={"Referer": "https://www.youtube.com/",
+                 "Origin": "https://www.youtube.com"}))
+test("v3_xorigin", lambda: fetch(
+    v3, headers={"X-Origin": "https://www.youtube.com",
+                 "Referer": "https://www.youtube.com/"}))
+test("v3_alt_host", lambda: fetch(
+    "https://youtube.googleapis.com/youtube/v3/videos"
+    "?part=statistics&id=" + VID + "&key=" + KEY,
+    headers={"Referer": "https://www.youtube.com/"}))
+test("v3_snippet", lambda: fetch(
+    "https://www.googleapis.com/youtube/v3/videos?part=snippet&id="
+    + VID + "&key=" + KEY))
+
+ctx_web = {"context": {"client": {
+    "clientName": "WEB", "clientVersion": "2.20241101.00.00",
+    "hl": "zh-CN", "gl": "TW"}}}
+ctx_android = {"context": {"client": {
+    "clientName": "ANDROID", "clientVersion": "20.10.38",
+    "androidSdkVersion": 30, "hl": "zh-CN", "gl": "US"}}}
+
+test("next_web", lambda: fetch(
+    "https://www.youtube.com/youtubei/v1/next?key=" + KEY,
+    data=dict(ctx_web, videoId=VID, contentCheckOk=True,
+              racyCheckOk=True),
+    headers={"Origin": "https://www.youtube.com"}))
+test("next_android", lambda: fetch(
+    "https://www.youtube.com/youtubei/v1/next?key=" + KEY,
+    data=dict(ctx_android, videoId=VID, contentCheckOk=True,
+              racyCheckOk=True)))
+
+test("m_watch", lambda: fetch(
+    "https://m.youtube.com/watch?v=" + VID + "&hl=zh-CN"))
+test("watch_verified", lambda: fetch(
+    "https://www.youtube.com/watch?v=" + VID
+    + "&bpctr=9999999999&has_verified=1&hl=zh-CN"))
+test("nocookie_embed", lambda: fetch(
+    "https://www.youtube-nocookie.com/embed/" + VID + "?hl=zh-CN"))
+
+browse_body = dict(ctx_web)
+browse_body["browseId"] = CID
+browse_body["params"] = "EgZ2aWRlb3PyBgQKAjoA"
+test("browse_videos", lambda: fetch(
+    "https://www.youtube.com/youtubei/v1/browse?key=" + KEY,
+    data=browse_body,
+    headers={"Origin": "https://www.youtube.com"}))
 
 (ROOT / "status.json").write_text(
-    json.dumps(status, ensure_ascii=False), encoding="utf-8")
-sys.exit(0 if status["ok"] else 1)
+    json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
+print(json.dumps(res, ensure_ascii=False)[:2500])
