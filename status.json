@@ -1,5 +1,5 @@
 {
- "run_at": "2026-11-10T12:45:29+08:00",
+ "run_at": "2026-11-10T13:00:21+08:00",
  "ok": true,
  "secret_set": true,
  "channels": {
@@ -37,17 +37,17 @@
  "sample": [
   {
    "id": "pzSZEyvOL6M",
-   "views": 21620,
+   "views": 21637,
    "title": "生產線忙到轉不停，員工直接在工位睡覺@MOONCAKEF"
   },
   {
    "id": "PeSNnT69zd8",
-   "views": 29172,
+   "views": 29230,
    "title": "客人比多大，老闆就切多大？這遊戲也太上頭！@debest"
   },
   {
    "id": "sVbXikD85C8",
-   "views": 99139,
+   "views": 99233,
    "title": "這絕對是我見過串羊肉串最快的方法@FoodNetwork"
   },
   {
@@ -58,6 +58,6 @@
  ],
  "push": {
   "status": 200,
-  "body": "{\"ok\": true, \"videos\": 45, \"snapshots\": 4, \"latest\": \"2026-11-10T12:30:00+08:00\"}"
+  "body": "{\"ok\": true, \"videos\": 45, \"snapshots\": 4, \"latest\": \"2026-11-10T13:00:00+08:00\"}"
  }
 }
