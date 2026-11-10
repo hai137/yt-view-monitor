@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 """境外节点采集真实播放量，回传给云端看板服务渲染。
 
-视频列表来自 youtubei/v1/browse，播放量依次尝试多个官方 player 客户端
-（含 ANDROID_VR）与 watch/embed 页面；抓不到就跳过，绝不填估算值。
+视频列表来自 youtubei/v1/browse，播放量先探测一个能用的官方 player
+客户端（含 ANDROID_VR）再并发抓取，失败回退 watch/embed 页面。
+抓不到的数据跳过，绝不填估算值。
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ ROOT = Path(__file__).resolve().parent
 cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
 code = os.environ.get("SHARE_CODE", "").strip()
 KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
+PLAYER = "https://www.youtube.com/youtubei/v1/player?key=" + KEY
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/122.0 Safari/537.36")
 HEADERS = {"User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"}
@@ -29,7 +31,7 @@ TZ = timezone(timedelta(hours=8))
 opener = urllib.request.build_opener()
 status = {
     "run_at": datetime.now(TZ).isoformat(timespec="seconds"),
-    "ok": False, "secret_set": bool(code), "client_hits": {}, "channels": {},
+    "ok": False, "secret_set": bool(code), "channels": {}, "client_hits": {},
 }
 
 CLIENTS = (
@@ -61,53 +63,37 @@ def http(url, data=None, extra=None, timeout=15) -> bytes:
 
 
 def parse_browse(raw: bytes) -> list:
-    data = json.loads(raw.decode("utf-8", "replace"))
+    text = raw.decode("utf-8", "replace")
     out, seen = [], set()
+    try:
+        data = json.loads(text)
 
-    def walk(node):
-        if isinstance(node, dict):
-            vr = node.get("videoRenderer") or node.get("gridVideoRenderer")
-            if vr and vr.get("videoId"):
-                vid = vr["videoId"]
-                title = ("".join(r.get("text", "") for r in
-                                 vr.get("title", {}).get("runs", []))
-                         or vr.get("title", {}).get("simpleText", ""))
-                pub = (vr.get("publishedTimeText", {}).get("simpleText", "")
-                       or "")
-                if vid not in seen:
-                    seen.add(vid)
-                    out.append({"id": vid, "title": title or "(无标题)",
-                                "pub": pub})
-            for v in node.values():
-                walk(v)
-        elif isinstance(node, list):
-            for v in node:
-                walk(v)
-
-    walk(data)
+        def walk(node):
+            if isinstance(node, dict):
+                vr = node.get("videoRenderer") or node.get("gridVideoRenderer")
+                if vr and vr.get("videoId"):
+                    vid = vr["videoId"]
+                    title = ("".join(r.get("text", "") for r in
+                                     vr.get("title", {}).get("runs", []))
+                             or vr.get("title", {}).get("simpleText", ""))
+                    if vid not in seen:
+                        seen.add(vid)
+                        out.append({"id": vid, "title": title or "", "pub": ""})
+                for v in node.values():
+                    walk(v)
+            elif isinstance(node, list):
+                for v in node:
+                    walk(v)
+        walk(data)
+    except Exception:
+        pass
+    if not out:
+        for m in re.finditer(r'"videoId"\s*:\s*"([A-Za-z0-9_-]{11})"', text):
+            vid = m.group(1)
+            if vid not in seen:
+                seen.add(vid)
+                out.append({"id": vid, "title": "", "pub": ""})
     return out[:15]
-
-
-def approx_time(txt: str) -> str:
-    if not txt:
-        return ""
-    m = re.search(r"(\d+)\s*(天|日|小時|小时|週|周|個月|个月|年|分|分鐘|分钟)", txt)
-    if not m:
-        return ""
-    n, unit = int(m.group(1)), m.group(2)
-    if unit in ("天", "日"):
-        delta = timedelta(days=n)
-    elif unit in ("週", "周"):
-        delta = timedelta(weeks=n)
-    elif unit in ("個月", "个月"):
-        delta = timedelta(days=30 * n)
-    elif unit == "年":
-        delta = timedelta(days=365 * n)
-    elif unit in ("小時", "小时"):
-        delta = timedelta(hours=n)
-    else:
-        delta = timedelta(minutes=n)
-    return (datetime.now(TZ) - delta).isoformat(timespec="seconds")
 
 
 def browse_entries(cid: str) -> list:
@@ -124,25 +110,41 @@ def browse_entries(cid: str) -> list:
     return parse_browse(raw)
 
 
-def one_view(vid: str):
-    for name, ver, extra in CLIENTS:
-        client = {"clientName": name, "clientVersion": ver}
-        client.update(extra)
-        body = json.dumps({
-            "context": {"client": client},
-            "videoId": vid, "contentCheckOk": True, "racyCheckOk": True,
-        }).encode()
+def try_client(vid, client_tuple):
+    name, ver, extra = client_tuple
+    client = {"clientName": name, "clientVersion": ver}
+    client.update(extra)
+    body = json.dumps({
+        "context": {"client": client},
+        "videoId": vid, "contentCheckOk": True, "racyCheckOk": True,
+    }).encode()
+    raw = http(PLAYER, data=body,
+               extra={"Content-Type": "application/json",
+                      "Origin": "https://www.youtube.com"}, timeout=12)
+    d = json.loads(raw.decode("utf-8", "replace"))
+    v = d.get("videoDetails", {}).get("viewCount")
+    return int(v) if v and str(v).isdigit() else None
+
+
+def find_client(vid):
+    for c in CLIENTS:
         try:
-            raw = http("https://www.youtube.com/youtubei/v1/player?key=" + KEY,
-                       data=body, extra={"Content-Type": "application/json",
-                                         "Origin": "https://www.youtube.com"},
-                       timeout=12)
-            d = json.loads(raw.decode("utf-8", "replace"))
-            v = d.get("videoDetails", {}).get("viewCount")
-            if v and str(v).isdigit():
-                return vid, int(v), name
+            n = try_client(vid, c)
+            if n is not None:
+                return c, n
         except Exception:
             continue
+    return None, None
+
+
+def one_view(vid, best):
+    if best:
+        try:
+            n = try_client(vid, best)
+            if n is not None:
+                return vid, n, best[0]
+        except Exception:
+            pass
     for kind, url in (("watch", f"https://www.youtube.com/watch?v={vid}&hl=zh-CN"),
                       ("embed", f"https://www.youtube.com/embed/{vid}?hl=zh-CN")):
         try:
@@ -170,24 +172,29 @@ try:
         channels[cid] = {
             "name": e["name"],
             "handle": (e.get("handle") or "").lstrip("@"),
-            "subscribers": 0,
-            "channelViews": "",
+            "subscribers": 0, "channelViews": "",
         }
         subs[cid] = 0
         for x in entries:
             videos[x["id"]] = {
-                "id": x["id"], "title": x["title"],
-                "publishedAt": approx_time(x["pub"]),
+                "id": x["id"], "title": x["title"], "publishedAt": "",
                 "url": "https://www.youtube.com/watch?v=" + x["id"],
                 "channelId": cid, "duration": "",
             }
             jobs.append(x["id"])
 
     views = {}
+    best, first_n = find_client(jobs[0])
+    status["best_client"] = best[0] if best else "none"
+    print("  播放量客户端：", status["best_client"], flush=True)
+    if first_n is not None:
+        views[jobs[0]] = first_n
+        status["client_hits"][best[0]] = 1
+    rest = jobs[1:] if first_n is not None else jobs
     pool = ThreadPoolExecutor(max_workers=8)
     try:
-        fs = {pool.submit(one_view, v): v for v in jobs}
-        done, pending = wait(fs, timeout=210)
+        fs = {pool.submit(one_view, v, best): v for v in rest}
+        done, pending = wait(fs, timeout=200)
         for f in pending:
             f.cancel()
         for f in done:
