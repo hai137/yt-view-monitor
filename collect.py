@@ -17,13 +17,44 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
+code = os.environ.get("SHARE_CODE", "").strip()
 status = {
     "run_at": datetime.now(timezone(timedelta(hours=8))).isoformat(timespec="seconds"),
     "ok": False,
+    "secret_set": bool(code),
 }
+CID = "UC_AglC5rzoBquyI3HYWHGyQ"
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/122.0 Safari/537.36")
+
+
+def probe(url: str) -> str:
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=12) as r:
+            return f"{r.status} {len(r.read(400))}B"
+    except Exception as e:
+        return f"{type(e).__name__}: {str(e)[:80]}"
+
+
+targets = [
+    ("rss_www", f"https://www.youtube.com/feeds/videos.xml?channel_id={CID}"),
+    ("rss_bare", f"https://youtube.com/feeds/videos.xml?channel_id={CID}"),
+    ("youtube_home", "https://www.youtube.com/"),
+    ("channel_videos", f"https://www.youtube.com/channel/{CID}/videos"),
+    ("nocookie_rss", f"https://www.youtube-nocookie.com/feeds/videos.xml?channel_id={CID}"),
+    ("jina_rss", "https://r.jina.ai/https://www.youtube.com/feeds/videos.xml?channel_id=" + CID),
+    ("piped", f"https://pipedapi.kavin.rocks/streams/{CID}"),
+    ("invidious", f"https://inv.nadeko.net/api/v1/channels/{CID}/videos"),
+    ("cloud_health", "https://yt-view-monitor.app.workbuddy.host/health?sharecode=" + code),
+]
+status["probes"] = {}
+for name, url in targets:
+    result = probe(url)
+    status["probes"][name] = result
+    print("PROBE", name, result, flush=True)
 
 try:
-    code = os.environ.get("SHARE_CODE", "").strip()
     if not code:
         raise RuntimeError("缺少 SHARE_CODE 环境变量，请在仓库 Secrets 中配置")
     import scraper
