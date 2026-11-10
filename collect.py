@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -32,8 +33,9 @@ try:
     payload = {"channels": channels, "videos": videos,
                "views": views, "subs": subs,
                "code": code}
+    push_url = cfg["push_url"] + "?sharecode=" + urllib.parse.quote(code, safe="")
     req = urllib.request.Request(
-        cfg["push_url"],
+        push_url,
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
         headers={"Content-Type": "application/json",
                  "User-Agent": "yt-monitor/1.0",
@@ -46,7 +48,10 @@ try:
     status.update({"ok": True, "videos": len(views), "response": body[:200]})
     print(f"OK：{len(views)} 条真实播放量已回传")
 except Exception as e:
-    status["error"] = f"{type(e).__name__}: {str(e)[:200]}"
+    url = getattr(e, "url", "") or ""
+    where = urllib.parse.urlparse(url).path if url else ""
+    status["error"] = (f"{type(e).__name__}: {str(e)[:160]}"
+                       + (f" @ {where}" if where else ""))
     print("FAILED:", status["error"], flush=True)
 
 (ROOT / "status.json").write_text(
