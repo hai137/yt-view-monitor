@@ -1,92 +1,26 @@
 {
- "run_at": "2026-11-10T11:20:31+08:00",
- "diag": 3,
+ "run_at": "2026-11-10T11:24:56+08:00",
  "ok": false,
- "fields": {
-  "len": 934835,
-  "videoViewCountRenderer": {
-   "count": 2,
-   "ctx": [
-    "loadMessageNames\": [           \"twoColumnWatchNextResults\",           \"results\",           \"videoPrimaryInfoRenderer\",           \"videoViewCountRenderer\",           \"menuRenderer\",           \"menuServiceItemRenderer\",           \"segmentedLikeDislikeButtonViewModel\",           \"likeButtonViewModel\",           \"toggleButtonViewModel\",           \"buttonViewModel\",           \"modalWithTitleA",
-    "                 }                     }                   ]                 },                 \"viewCount\": {                   \"videoViewCountRenderer\": {                     \"viewCount\": {                       \"simpleText\": \"28,559次观看\"                     },                     \"extraShortViewCount\": {                       \"accessibility\": {                         \"accessibilityDat"
-   ]
+ "secret_set": true,
+ "channels": {
+  "UC_AglC5rzoBquyI3HYWHGyQ": {
+   "videos": 0,
+   "subscribers": 7890,
+   "exact_subs": false
   },
-  "viewCountFactoidRenderer": {
-   "count": 2,
-   "ctx": [
-    "      \"structuredDescriptionContentRenderer\",           \"videoDescriptionHeaderRenderer\",           \"factoidRenderer\",           \"viewCountFactoidRenderer\",           \"uploadTimeFactoidRenderer\",           \"expandableVideoDescriptionBodyRenderer\",           \"howThisWasMadeSectionViewModel\",           \"videoDescriptionInfocardsSectionRenderer\",           \"desktopTopbarRenderer\",          ",
-    "       \"enableColorSampledText\": true                       }                     },                     {                       \"viewCountFactoidRenderer\": {                         \"viewCountEntityKey\": \"EgtQZVNOblQ2OXpkOCDCASgB\",                         \"factoid\": {                           \"factoidRenderer\": {                             \"value\": {                               \"sim"
-   ]
+  "UCmaMFmdJPY47IdGvCo3jSjw": {
+   "videos": 0,
+   "subscribers": 7830,
+   "exact_subs": false
   },
-  "\"viewCount\"": {
-   "count": 3,
-   "ctx": [
-    "2\"                         }                       }                     }                   ]                 },                 \"viewCount\": {                   \"videoViewCountRenderer\": {                     \"viewCount\": {                       \"simpleText\": \"28,559次观看\"                     },                     \"extraShortViewCount\": {                       \"accessibility\": {        ",
-    "            ]                 },                 \"viewCount\": {                   \"videoViewCountRenderer\": {                     \"viewCount\": {                       \"simpleText\": \"28,559次观看\"                     },                     \"extraShortViewCount\": {                       \"accessibility\": {                         \"accessibilityData\": {                           \"label\": \"28,55",
-    "_REPLACE\",           \"payload\": {             \"viewCountEntity\": {               \"key\": \"EgtQZVNOblQ2OXpkOCDCASgB\",               \"viewCount\": {                 \"simpleText\": \"28,559次观看\"               },               \"shortViewCount\": {                 \"accessibility\": {                   \"accessibilityData\": {                     \"label\": \"28,559次观看\"                   }                "
-   ]
-  },
-  "shortViewCountText": {
-   "count": 13,
-   "ctx": [
-    "              }                 },                 \"trackingParams\": \"CEQQvU4YACITCJuU0fy4_JcDFT8lVwEd80c15Q==\",                 \"shortViewCountText\": {                   \"accessibility\": {                     \"accessibilityData\": {                       \"label\": \"62万次观看\"                     }                   },                   \"simpleText\": \"62万次观看\"                 },               ",
-    "              }                 },                 \"trackingParams\": \"CEMQvU4YASITCJuU0fy4_JcDFT8lVwEd80c15Q==\",                 \"shortViewCountText\": {                   \"accessibility\": {                     \"accessibilityData\": {                       \"label\": \"104万次观看\"                     }                   },                   \"simpleText\": \"104万次观看\"                 },             ",
-    "              }                 },                 \"trackingParams\": \"CEIQvU4YAiITCJuU0fy4_JcDFT8lVwEd80c15Q==\",                 \"shortViewCountText\": {                   \"accessibility\": {                     \"accessibilityData\": {                       \"label\": \"17万次观看\"                     }                   },                   \"simpleText\": \"17万次观看\"                 },               ",
-    "              }                 },                 \"trackingParams\": \"CEEQvU4YAyITCJuU0fy4_JcDFT8lVwEd80c15Q==\",                 \"shortViewCountText\": {                   \"accessibility\": {                     \"accessibilityData\": {                       \"label\": \"77万次观看\"                     }                   },                   \"simpleText\": \"77万次观看\"                 },               ",
-    "              }                 },                 \"trackingParams\": \"CEAQvU4YBCITCJuU0fy4_JcDFT8lVwEd80c15Q==\",                 \"shortViewCountText\": {                   \"accessibility\": {                     \"accessibilityData\": {                       \"label\": \"131万次观看\"                     }                   },                   \"simpleText\": \"131万次观看\"                 },             "
-   ]
-  },
-  "numeric_candidates": [],
-  "chinese_counts": [
-   "28,559",
-   "28,559",
-   "1,858",
-   "28,559",
-   "28,559",
-   "28,559",
-   "28,559",
-   "28,559"
-  ]
- },
- "mirrors": {
-  "inv_nadeko": {
-   "ok": false,
-   "error": "HTTPError: HTTP Error 403: Forbidden"
-  },
-  "yewtu": {
-   "ok": false,
-   "error": "HTTPError: HTTP Error 403: Forbidden"
-  },
-  "inv_private_coffee": {
-   "ok": false,
-   "error": "HTTPError: HTTP Error 502: Bad Gateway"
-  },
-  "inv_projectsegfau": {
-   "ok": false,
-   "error": "URLError: <urlopen error [Errno 101] Network is unreachable>"
-  },
-  "inv_nerdvpn": {
-   "ok": false,
-   "error": "HTTPError: HTTP Error 403: Forbidden"
-  },
-  "piped_adminforge": {
-   "ok": false,
-   "error": "HTTPError: HTTP Error 403: Forbidden"
-  },
-  "piped_kavin": {
-   "ok": false,
-   "error": "HTTPError: HTTP Error 403: Forbidden"
-  },
-  "piped_reallyawesome": {
-   "ok": true,
-   "status": 200,
-   "len": 1394,
-   "viewCount": [],
-   "head": "<!doctype html><meta charset=utf-8><meta content=\"width=device-width,initial-scale=1.0\" name=viewport><title>Hate walking. And you"
-  },
-  "piped_darkness": {
-   "ok": false,
-   "error": "URLError: <urlopen error [Errno 101] Network is unreachable>"
+  "UCam5YvQCGc_18jERc34XGxQ": {
+   "videos": 0,
+   "subscribers": 3500,
+   "exact_subs": false
   }
- }
+ },
+ "views_ok": 0,
+ "views_fail": 0,
+ "push": null,
+ "error": "没有取得任何真实播放量，不回传"
 }
