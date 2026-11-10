@@ -1,5 +1,5 @@
 {
- "run_at": "2026-11-10T16:02:42+08:00",
+ "run_at": "2026-11-10T19:54:12+08:00",
  "ok": true,
  "secret_set": true,
  "channels": {
@@ -8,8 +8,8 @@
    "subscribers": 7890,
    "exact_subs": false,
    "first": [
-    "pzSZEyvOL6M",
-    "PeSNnT69zd8"
+    "0xCDis7hj-I",
+    "aUcPA4WFIhQ"
    ]
   },
   "UCmaMFmdJPY47IdGvCo3jSjw": {
@@ -17,8 +17,8 @@
    "subscribers": 7830,
    "exact_subs": false,
    "first": [
-    "wJb428KbAME",
-    "058BWwToQpM"
+    "mFTaI4DjFDc",
+    "iBni2ZNENro"
    ]
   },
   "UCam5YvQCGc_18jERc34XGxQ": {
@@ -26,8 +26,8 @@
    "subscribers": 3500,
    "exact_subs": false,
    "first": [
-    "QEOnnT8DBVI",
-    "y6XvMLniBg0"
+    "SZ9U9adW18o",
+    "KUlDSpa4Jkw"
    ]
   }
  },
@@ -36,28 +36,28 @@
  "titles_ok": 45,
  "sample": [
   {
+   "id": "0xCDis7hj-I",
+   "views": 1042,
+   "title": "孫女教奶奶一招剝玉米，沒想到真的這麼簡單！@bellad"
+  },
+  {
+   "id": "aUcPA4WFIhQ",
+   "views": 1052,
+   "title": "顧客嫌拉麵不好吃，店員的處理方式也太狠了！😂@tondo"
+  },
+  {
    "id": "pzSZEyvOL6M",
-   "views": 22233,
+   "views": 23139,
    "title": "生產線忙到轉不停，員工直接在工位睡覺@MOONCAKEF"
   },
   {
    "id": "PeSNnT69zd8",
-   "views": 30722,
+   "views": 33200,
    "title": "客人比多大，老闆就切多大？這遊戲也太上頭！@debest"
-  },
-  {
-   "id": "sVbXikD85C8",
-   "views": 100057,
-   "title": "這絕對是我見過串羊肉串最快的方法@FoodNetwork"
-  },
-  {
-   "id": "pqNciLK8Y3g",
-   "views": 1798,
-   "title": "裱花師的外掛，竟然是一台投影機🎂@MomentsGang"
   }
  ],
  "push": {
   "status": 200,
-  "body": "{\"ok\": true, \"videos\": 45, \"snapshots\": 7, \"latest\": \"2026-11-10T16:00:00+08:00\"}"
+  "body": "{\"ok\": true, \"videos\": 45, \"snapshots\": 8, \"latest\": \"2026-11-10T19:30:00+08:00\"}"
  }
 }
