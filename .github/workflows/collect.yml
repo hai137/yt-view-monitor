@@ -1,0 +1,40 @@
+name: collect
+on:
+  schedule:
+    - cron: '0,30 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/collect.yml'
+      - 'collect.py'
+      - 'scraper.py'
+      - 'config.json'
+permissions:
+  contents: write
+concurrency:
+  group: yt-monitor-collect
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: collect and push
+        env:
+          SHARE_CODE: ${{ secrets.SHARE_CODE }}
+        run: python collect.py
+      - name: save status
+        if: always()
+        run: |
+          git config user.name "yt-monitor[bot]"
+          git config user.email "yt-monitor@users.noreply.github.com"
+          git add status.json
+          git diff --cached --quiet || git commit -m "status: $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
