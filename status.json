@@ -1,69 +1,147 @@
 {
- "run_at": "2026-11-10T11:17:55+08:00",
- "diag": true,
+ "run_at": "2026-11-10T11:19:00+08:00",
+ "diag": 2,
  "ok": false,
  "tests": {
-  "egress_ip": {
-   "ok": true,
-   "status": 200,
-   "len": 21,
-   "head": "{\"ip\":\"68.154.54.41\"}"
-  },
-  "v3_plain": {
-   "ok": false,
-   "error": "HTTPError: HTTP Error 403: Forbidden"
-  },
-  "v3_referer": {
-   "ok": false,
-   "error": "HTTPError: HTTP Error 403: Forbidden"
-  },
-  "v3_xorigin": {
-   "ok": false,
-   "error": "HTTPError: HTTP Error 403: Forbidden"
-  },
-  "v3_alt_host": {
-   "ok": false,
-   "error": "HTTPError: HTTP Error 403: Forbidden"
-  },
-  "v3_snippet": {
-   "ok": false,
-   "error": "HTTPError: HTTP Error 403: Forbidden"
-  },
   "next_web": {
    "ok": true,
    "status": 200,
-   "len": 912094,
-   "head": "{   \"responseContext\": {     \"visitorData\": \"CgtKeDdidi05NVh2ayjkmcrXBjIKCgJVUxIEGgAgRw%3D%3D\",     \"serviceTrackingParams\": [       {         \"service\": \"CSI\",         \"params\": [           {             \"key\": \"c\",    "
+   "len": 925830,
+   "viewCount": {
+    "count": 11,
+    "ctx": [
+     "criptionContentRenderer\",           \"videoDescriptionHeaderRenderer\",           \"factoidRenderer\",           \"viewCountFactoidRenderer\",           \"uploadTimeFactoidRenderer\",           \"expandableVideoDescriptionBodyRenderer\",           \"howThisWasMadeSectionViewModel\",           \"videoDescriptionInfocardsSectionRenderer\",           \"des",
+     "      }                       }                     }                   ]                 },                 \"viewCount\": {                   \"videoViewCountRenderer\": {                     \"viewCount\": {                       \"simpleText\": \"28,559次观看\"                     },                     \"extraShortViewCount\": {                    "
+    ]
+   },
+   "shortViewCountText": {
+    "count": 13,
+    "ctx": [
+     "            },                 \"trackingParams\": \"CEQQvU4YACITCKO4odG4_JcDFfeXigcdhlY3fQ==\",                 \"shortViewCountText\": {                   \"runs\": [                     {                       \"text\": \"393\"                     },                     {                       \"text\": \"人正在观看\"                     }                 ",
+     "            },                 \"trackingParams\": \"CEMQvU4YASITCKO4odG4_JcDFfeXigcdhlY3fQ==\",                 \"shortViewCountText\": {                   \"accessibility\": {                     \"accessibilityData\": {                       \"label\": \"34万次观看\"                     }                   },                   \"simpleText\": \"34万次观看\"    "
+    ]
+   },
+   "videoViewCountRenderer": {
+    "count": 2,
+    "ctx": [
+     "           \"twoColumnWatchNextResults\",           \"results\",           \"videoPrimaryInfoRenderer\",           \"videoViewCountRenderer\",           \"menuRenderer\",           \"menuServiceItemRenderer\",           \"segmentedLikeDislikeButtonViewModel\",           \"likeButtonViewModel\",           \"toggleButtonViewModel\",           \"buttonViewMode",
+     "                   }                   ]                 },                 \"viewCount\": {                   \"videoViewCountRenderer\": {                     \"viewCount\": {                       \"simpleText\": \"28,559次观看\"                     },                     \"extraShortViewCount\": {                       \"accessibility\": {            "
+    ]
+   },
+   "videoDetails": {
+    "count": 2,
+    "ctx": [
+     "erer\": {           \"trackingParams\": \"CAAQg2ciEwijuKHRuPyXAxX3l4oHHYZWN33KAQSvhwXj\"         }       },       \"videoDetails\": {         \"playerOverlayVideoDetailsRenderer\": {           \"title\": {             \"simpleText\": \"客人比多大，老闆就切多大？這遊戲也太上頭！@debestelekkernij#shorts\"           },           \"subtitle\": {             \"runs\": [             ",
+     "leInLightTheme\": true         }       }     }   ],   \"microformat\": {     \"microformatDataRenderer\": {       \"videoDetails\": {         \"comments\": [           {             \"@type\": \"https://schema.org/Comment\",             \"dateCreated\": \"2026-11-09T01:07:04-08:00\",             \"text\": \"我怕客人等一下跑走了🤣\",             \"author\": {              "
+    ]
+   }
   },
   "next_android": {
    "ok": true,
    "status": 200,
-   "len": 15062078,
-   "head": "{   \"responseContext\": {     \"visitorData\": \"CgtjM3FlTGxOTmRIbyjlmcrXBjIKCgJVUxIEGgAgRDoCCAFIAWKtAgqqAkN0d0JDQVVTamdFQkRCNlBESXZNakZzNkhVRW9qYXB1TmUzYWd6bUdPbHRfUUt5NEhCTURMMTdTV1l5Nmd2M2JOY01Bd2pvYy1GaWZVdjAzbnFBNkNoNVR"
+   "len": 13608482,
+   "viewCount": {
+    "count": 13,
+    "ctx": [
+     " {                                       \"videoSubtitleViewModel\": {                                         \"viewCountEntity\": {                                           \"key\": \"EgtQZVNOblQ2OXpkOCDCASgB\",                                           \"viewCount\": {                                             \"runs\": [                       ",
+     "                                \"key\": \"EgtQZVNOblQ2OXpkOCDCASgB\",                                           \"viewCount\": {                                             \"runs\": [                                               {                                                 \"text\": \"28,559次观看\"                                               "
+    ]
+   },
+   "shortViewCountText": {
+    "count": 1,
+    "ctx": [
+     "\"runs\": [               {                 \"text\": \"7天前\"               }             ]           },           \"shortViewCountText\": {             \"runs\": [               {                 \"text\": \"23万次观看\"               }             ],             \"accessibility\": {               \"accessibilityData\": {                 \"label\": \"23万次观看\"    "
+    ]
+   },
+   "videoDetails": {
+    "count": 1,
+    "ctx": [
+     "  },           \"showPausedWhenDisabledMode\": \"OVERLAY_PAUSED_VIEW_MODE_UNSPECIFIED\"         }       },       \"videoDetails\": {         \"playerOverlayVideoDetailsRenderer\": {           \"title\": {             \"runs\": [               {                 \"text\": \"客人比多大，老闆就切多大？這遊戲也太上頭！@debestelekkernij#shorts\"               }             ]      "
+    ]
+   }
   },
   "m_watch": {
    "ok": true,
    "status": 200,
-   "len": 1287945,
-   "head": "<!DOCTYPE html><html style=\"font-size: 62.5%;font-family: Roboto, Arial, sans-serif;\" lang=\"zh-Hans-CN\" darker-dark-theme darker-dark-theme-deprecate system-icons color-version=\"v2_0\" typography typography-spacing><head>"
+   "len": 1235976,
+   "viewCount": {
+    "count": 12,
+    "ctx": [
+     "edDescriptionContentRenderer\",\"videoTitleHeaderViewModel\",\"videoDescriptionHeaderRenderer\",\"factoidRenderer\",\"viewCountFactoidRenderer\",\"uploadTimeFactoidRenderer\",\"expandableVideoDescriptionBodyRenderer\",\"howThisWasMadeSectionViewModel\",\"videoDescriptionInfocardsSectionRenderer\",\"linearLayoutViewModel\",\"sectionHeaderViewModel\",\"listItemV",
+     "gingDirectives\":{\"trackingParams\":\"CO0BENbKAxgHIhMI-fOh0rj8lwMVz0_DAB0MqxWu\",\"visibility\":{\"types\":\"12\"}}}]},\"viewCount\":{\"videoViewCountRenderer\":{\"viewCount\":{\"simpleText\":\"28,559次观看\"},\"extraShortViewCount\":{\"accessibility\":{\"accessibilityData\":{\"label\":\"28,559次观看\"}},\"simpleText\":\"2.8万\"},\"entityKey\":\"EgtQZVNOblQ2OXpkOCDCASgB\",\"originalV"
+    ]
+   },
+   "shortViewCountText": {
+    "count": 13,
+    "ctx": [
+     "4.236.89.18\\u0026mt=1794279667\\u0026oweuc=\"}}}}},\"trackingParams\":\"CEwQvU4YACITCPnzodK4_JcDFc9PwwAdDKsVrg==\",\"shortViewCountText\":{\"accessibility\":{\"accessibilityData\":{\"label\":\"39万次观看\"}},\"simpleText\":\"39万\"},\"publishedTimeText\":{\"simpleText\":\"19小时前\"},\"thumbnailOverlays\":[{\"thumbnailOverlayTimeStatusRenderer\":{\"text\":{\"accessibility\":{\"acc",
+     "4.236.89.18\\u0026mt=1794279667\\u0026oweuc=\"}}}}},\"trackingParams\":\"CEsQvU4YASITCPnzodK4_JcDFc9PwwAdDKsVrg==\",\"shortViewCountText\":{\"accessibility\":{\"accessibilityData\":{\"label\":\"511万次观看\"}},\"simpleText\":\"511万\"},\"publishedTimeText\":{\"simpleText\":\"19小时前\"},\"thumbnailOverlays\":[{\"thumbnailOverlayTimeStatusRenderer\":{\"text\":{\"accessibility\":{\"a"
+    ]
+   },
+   "videoViewCountRenderer": {
+    "count": 2,
+    "ctx": [
+     "ContextPreloadData\":{\"preloadMessageNames\":[\"twoColumnWatchNextResults\",\"results\",\"videoPrimaryInfoRenderer\",\"videoViewCountRenderer\",\"menuRenderer\",\"menuServiceItemRenderer\",\"segmentedLikeDislikeButtonViewModel\",\"likeButtonViewModel\",\"toggleButtonViewModel\",\"buttonViewModel\",\"modalWithTitleAndButtonRenderer\",\"buttonRenderer\",\"dislikeButt",
+     "s\":{\"trackingParams\":\"CO0BENbKAxgHIhMI-fOh0rj8lwMVz0_DAB0MqxWu\",\"visibility\":{\"types\":\"12\"}}}]},\"viewCount\":{\"videoViewCountRenderer\":{\"viewCount\":{\"simpleText\":\"28,559次观看\"},\"extraShortViewCount\":{\"accessibility\":{\"accessibilityData\":{\"label\":\"28,559次观看\"}},\"simpleText\":\"2.8万\"},\"entityKey\":\"EgtQZVNOblQ2OXpkOCDCASgB\",\"originalViewCount\":\"28"
+    ]
+   },
+   "playabilityStatus": {
+    "count": 1,
+    "ctx": [
+     "essageNames\":[\"playerInterstitialRenderer\",\"interstitialViewModel\",\"buttonViewModel\"]},\"hasDecorated\":true}},\"playabilityStatus\":{\"status\":\"LOGIN_REQUIRED\",\"reason\":\"请登录，以便我们确认你不是聊天机器人\",\"errorScreen\":{\"playerInterstitialRenderer\":{\"content\":{\"interstitialViewModel\":{\"title\":{\"content\":\"请登录，以便我们确认你不是聊天机器人\"},\"description\":{\"content\":\"这有助于保护"
+    ]
+   },
+   "videoDetails": {
+    "count": 2,
+    "ctx": [
+     "kQlKwJGBgiEwj586HSuPyXAxXPT8MAHQyrFa4=\"}}],\"trackingParams\":\"CAAQg2ciEwj586HSuPyXAxXPT8MAHQyrFa7KAQRV6c8h\"}},\"videoDetails\":{\"playerOverlayVideoDetailsRenderer\":{\"title\":{\"simpleText\":\"客人比多大，老闆就切多大？這遊戲也太上頭！@debestelekkernij#shorts\"},\"subtitle\":{\"runs\":[{\"text\":\"小羊看世界\"},{\"text\":\"   \"},{\"text\":\"28,559次观看\"},{\"text\":\"   \"},{\"text\":\"19小时前\"}]},",
+     "10000\",\"value\":2575250464},{\"key\":\"15000\",\"value\":2574401845}]}}}],\"microformat\":{\"microformatDataRenderer\":{\"videoDetails\":{\"comments\":[{\"type\":\"https://schema.org/Comment\",\"dateCreated\":\"2026-11-09T01:07:04-08:00\",\"text\":\"我怕客人等一下跑走了🤣\",\"author\":{\"type\":\"https://schema.org/Person\",\"name\":\"@HK_ProgamerLTC\",\"url\":\"https://www.youtube.com/@H"
+    ]
+   }
   },
   "watch_verified": {
    "ok": true,
    "status": 200,
-   "len": 1230427,
-   "head": "<!DOCTYPE html><html style=\"font-size: 62.5%;font-family: Roboto, Arial, sans-serif;\" lang=\"zh-Hans-CN\" darker-dark-theme darker-dark-theme-deprecate system-icons color-version=\"v2_0\" typography typography-spacing><head>"
+   "len": 1227225,
+   "viewCount": {
+    "count": 12,
+    "ctx": [
+     "edDescriptionContentRenderer\",\"videoTitleHeaderViewModel\",\"videoDescriptionHeaderRenderer\",\"factoidRenderer\",\"viewCountFactoidRenderer\",\"uploadTimeFactoidRenderer\",\"expandableVideoDescriptionBodyRenderer\",\"howThisWasMadeSectionViewModel\",\"videoDescriptionInfocardsSectionRenderer\",\"linearLayoutViewModel\",\"sectionHeaderViewModel\",\"listItemV",
+     "gingDirectives\":{\"trackingParams\":\"COwBENbKAxgIIhMI3ZfK0rj8lwMVBq5_BB2b9R0O\",\"visibility\":{\"types\":\"12\"}}}]},\"viewCount\":{\"videoViewCountRenderer\":{\"viewCount\":{\"simpleText\":\"28,559次观看\"},\"extraShortViewCount\":{\"accessibility\":{\"accessibilityData\":{\"label\":\"28,559次观看\"}},\"simpleText\":\"2.8万\"},\"entityKey\":\"EgtQZVNOblQ2OXpkOCDCASgB\",\"originalV"
+    ]
+   },
+   "shortViewCountText": {
+    "count": 13,
+    "ctx": [
+     "4.236.89.18\\u0026mt=1794280489\\u0026oweuc=\"}}}}},\"trackingParams\":\"CEwQvU4YACITCN2XytK4_JcDFQaufwQdm_UdDg==\",\"shortViewCountText\":{\"accessibility\":{\"accessibilityData\":{\"label\":\"62万次观看\"}},\"simpleText\":\"62万\"},\"publishedTimeText\":{\"simpleText\":\"15小时前\"},\"thumbnailOverlays\":[{\"thumbnailOverlayTimeStatusRenderer\":{\"text\":{\"accessibility\":{\"acc",
+     "4.236.89.18\\u0026mt=1794280489\\u0026oweuc=\"}}}}},\"trackingParams\":\"CEsQvU4YASITCN2XytK4_JcDFQaufwQdm_UdDg==\",\"shortViewCountText\":{\"accessibility\":{\"accessibilityData\":{\"label\":\"514万次观看\"}},\"simpleText\":\"514万\"},\"publishedTimeText\":{\"simpleText\":\"9天前\"},\"thumbnailOverlays\":[{\"thumbnailOverlayTimeStatusRenderer\":{\"text\":{\"accessibility\":{\"acc"
+    ]
+   },
+   "videoViewCountRenderer": {
+    "count": 2,
+    "ctx": [
+     "ContextPreloadData\":{\"preloadMessageNames\":[\"twoColumnWatchNextResults\",\"results\",\"videoPrimaryInfoRenderer\",\"videoViewCountRenderer\",\"menuRenderer\",\"listItemViewModel\",\"menuServiceItemRenderer\",\"segmentedLikeDislikeButtonViewModel\",\"likeButtonViewModel\",\"toggleButtonViewModel\",\"buttonViewModel\",\"modalWithTitleAndButtonRenderer\",\"buttonRe",
+     "s\":{\"trackingParams\":\"COwBENbKAxgIIhMI3ZfK0rj8lwMVBq5_BB2b9R0O\",\"visibility\":{\"types\":\"12\"}}}]},\"viewCount\":{\"videoViewCountRenderer\":{\"viewCount\":{\"simpleText\":\"28,559次观看\"},\"extraShortViewCount\":{\"accessibility\":{\"accessibilityData\":{\"label\":\"28,559次观看\"}},\"simpleText\":\"2.8万\"},\"entityKey\":\"EgtQZVNOblQ2OXpkOCDCASgB\",\"originalViewCount\":\"28"
+    ]
+   },
+   "playabilityStatus": {
+    "count": 1,
+    "ctx": [
+     "essageNames\":[\"playerInterstitialRenderer\",\"interstitialViewModel\",\"buttonViewModel\"]},\"hasDecorated\":true}},\"playabilityStatus\":{\"status\":\"LOGIN_REQUIRED\",\"reason\":\"请登录，以便我们确认你不是聊天机器人\",\"errorScreen\":{\"playerInterstitialRenderer\":{\"content\":{\"interstitialViewModel\":{\"title\":{\"content\":\"请登录，以便我们确认你不是聊天机器人\"},\"description\":{\"content\":\"这有助于保护"
+    ]
+   },
+   "videoDetails": {
+    "count": 2,
+    "ctx": [
+     "kQlKwJGBgiEwjdl8rSuPyXAxUGrn8EHZv1HQ4=\"}}],\"trackingParams\":\"CAAQg2ciEwjdl8rSuPyXAxUGrn8EHZv1HQ7KAQSnOh5z\"}},\"videoDetails\":{\"playerOverlayVideoDetailsRenderer\":{\"title\":{\"simpleText\":\"客人比多大，老闆就切多大？這遊戲也太上頭！@debestelekkernij#shorts\"},\"subtitle\":{\"runs\":[{\"text\":\"小羊看世界\"},{\"text\":\"   \"},{\"text\":\"28,559次观看\"},{\"text\":\"   \"},{\"text\":\"19小时前\"}]},",
+     "10000\",\"value\":2575250464},{\"key\":\"15000\",\"value\":2574401845}]}}}],\"microformat\":{\"microformatDataRenderer\":{\"videoDetails\":{\"comments\":[{\"type\":\"https://schema.org/Comment\",\"dateCreated\":\"2026-11-09T01:07:04-08:00\",\"text\":\"我怕客人等一下跑走了🤣\",\"author\":{\"type\":\"https://schema.org/Person\",\"name\":\"@HK_ProgamerLTC\",\"url\":\"https://www.youtube.com/@H"
+    ]
+   }
   },
   "nocookie_embed": {
    "ok": true,
    "status": 200,
-   "len": 145349,
-   "head": "<!DOCTYPE html><html lang=\"zh-CN\" dir=\"ltr\" data-cast-api-enabled=\"true\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"robots\" content=\"noindex\"><script nonce=\"cqQC7V9XuTsc1i4p3cBn"
-  },
-  "browse_videos": {
-   "ok": true,
-   "status": 200,
-   "len": 996603,
-   "head": "{   \"responseContext\": {     \"visitorData\": \"CgtST0h2SU42dGF2RSjnmcrXBjIKCgJVUxIEGgAgMw%3D%3D\",     \"serviceTrackingParams\": [       {         \"service\": \"GFEEDBACK\",         \"params\": [           {             \"key\": \"b"
+   "len": 145465
   }
  }
 }
