@@ -1,1 +1,1 @@
-{"run_at": "2026-11-10T11:00:58+08:00", "ok": false, "secret_set": true, "client_hits": {}, "channels": {"UC_AglC5rzoBquyI3HYWHGyQ": "browse 0"}, "error": "RuntimeError: 频道 小羊看世界 的视频列表为空"}
+{"run_at": "2026-11-10T11:03:23+08:00", "ok": false, "secret_set": true, "channels": {"UC_AglC5rzoBquyI3HYWHGyQ": "browse 15", "UCmaMFmdJPY47IdGvCo3jSjw": "browse 15", "UCam5YvQCGc_18jERc34XGxQ": "browse 15"}, "client_hits": {"none": 45}, "best_client": "none", "error": "RuntimeError: 所有视频播放量都抓取失败，本次不回传"}
