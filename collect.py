@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """境外节点采集真实精确播放量，回传云端看板服务渲染。
 
-视频列表来自 youtubei/v1/browse；播放量来自 youtubei/v1/next 的
-videoViewCountRenderer.viewCount.simpleText（精确到个位）。
+视频 ID 来自 youtubei/v1/browse；标题、发布时间、精确播放量来自
+youtubei/v1/next 的 videoViewCountRenderer.viewCount.simpleText。
 抓不到就跳过，绝不填 0、绝不估算。
 """
 
@@ -44,7 +44,8 @@ LAST_SUBS = {
 status = {
     "run_at": datetime.now(TZ).isoformat(timespec="seconds"),
     "ok": False, "secret_set": bool(CODE), "channels": {},
-    "views_ok": 0, "views_fail": 0, "push": None,
+    "views_ok": 0, "views_fail": 0, "titles_ok": 0,
+    "sample": [], "push": None,
 }
 
 
@@ -60,29 +61,19 @@ def http(url, data=None, timeout=25):
         return r.read().decode("utf-8", "replace")
 
 
-def text_of(x) -> str:
-    if isinstance(x, str):
-        return x
-    if isinstance(x, dict):
-        if isinstance(x.get("simpleText"), str):
-            return x["simpleText"]
-        if isinstance(x.get("runs"), list):
-            return "".join(r.get("text", "") for r in x["runs"]
-                           if isinstance(r, dict))
-    return ""
-
-
-def walk(o):
-    if isinstance(o, dict):
-        vid = o.get("videoId")
-        if isinstance(vid, str) and re.fullmatch(r"[\w-]{11}", vid) \
-                and "title" in o:
-            yield vid, text_of(o["title"])
-        for v in o.values():
-            yield from walk(v)
-    elif isinstance(o, list):
-        for v in o:
-            yield from walk(v)
+VID_RE = re.compile(r'"videoId"\s*:\s*"([\w-]{11})"')
+SUB_RE = re.compile(r'"subscriberCountText"\s*:\s*\{\s*"simpleText"\s*'
+                    r':\s*"([\d,]+)\s*(?:位訂閱者|位订阅者|subscribers|訂閱者)"')
+VIEW_RE = re.compile(
+    r'"videoViewCountRenderer"\s*:\s*\{\s*"viewCount"\s*:\s*\{\s*'
+    r'"simpleText"\s*:\s*"([\d,]+)')
+VIEW_RE2 = re.compile(
+    r'"viewCount"\s*:\s*\{\s*"simpleText"\s*:\s*"([\d,]+)\s*'
+    r'(?:次觀看|次观看|views)"')
+TITLE_RE = re.compile(
+    r'"playerOverlayVideoDetailsRenderer"\s*:\s*\{\s*"title"\s*:\s*'
+    r'\{\s*"simpleText"\s*:\s*"([^"]+)"')
+DATE_RE = re.compile(r'"publishDate"\s*:\s*"([^"]+)"')
 
 
 def browse_channel(cid):
@@ -90,17 +81,16 @@ def browse_channel(cid):
     body["browseId"] = cid
     body["params"] = "EgZ2aWRlb3PyBgQKAjoA"
     raw = http(BROWSE, body)
-    found, seen = [], set()
-    for vid, title in walk(json.loads(raw)):
-        if vid not in seen and title:
-            seen.add(vid)
-            found.append((vid, title))
-        if len(found) >= 15:
+    vids, seen = [], set()
+    for m in VID_RE.finditer(raw):
+        v = m.group(1)
+        if v not in seen:
+            seen.add(v)
+            vids.append(v)
+        if len(vids) >= 15:
             break
     subs = None
-    m = re.search(r'"subscriberCountText"\s*:\s*\{\s*"simpleText"\s*'
-                  r':\s*"([\d,]+)\s*(?:位訂閱者|位订阅者|subscribers|訂閱者)"',
-                  raw)
+    m = SUB_RE.search(raw)
     if m:
         try:
             n = int(m.group(1).replace(",", ""))
@@ -108,16 +98,7 @@ def browse_channel(cid):
                 subs = n
         except ValueError:
             pass
-    return found, subs
-
-
-VIEW_RE = re.compile(
-    r'"videoViewCountRenderer"\s*:\s*\{\s*"viewCount"\s*:\s*\{\s*'
-    r'"simpleText"\s*:\s*"([\d,]+)')
-VIEW_RE2 = re.compile(
-    r'"viewCount"\s*:\s*\{\s*"simpleText"\s*:\s*"([\d,]+)\s*'
-    r'(?:次觀看|次观看|views)"')
-DATE_RE = re.compile(r'"publishDate"\s*:\s*"([^"]+)"')
+    return vids, subs
 
 
 def fetch_one(vid):
@@ -126,12 +107,13 @@ def fetch_one(vid):
                               racyCheckOk=True))
         m = VIEW_RE.search(raw) or VIEW_RE2.search(raw)
         if not m:
-            return vid, None, ""
+            return vid, None, "", ""
         n = int(m.group(1).replace(",", ""))
+        t = TITLE_RE.search(raw)
         d = DATE_RE.search(raw)
-        return vid, n, d.group(1) if d else ""
+        return vid, n, t.group(1) if t else "", d.group(1) if d else ""
     except Exception:
-        return vid, None, ""
+        return vid, None, "", ""
 
 
 def main():
@@ -139,7 +121,7 @@ def main():
     for c in cfg["channels"]:
         cid = c["channel_id"]
         try:
-            found, sub = browse_channel(cid)
+            vids, sub = browse_channel(cid)
         except Exception as e:
             status["channels"][cid] = {"error": type(e).__name__
                                        + ": " + str(e)[:110]}
@@ -151,12 +133,13 @@ def main():
             "channelViews": "",
         }
         subs[cid] = channels[cid]["subscribers"]
-        status["channels"][cid] = {"videos": len(found),
+        status["channels"][cid] = {"videos": len(vids),
                                    "subscribers": subs[cid],
-                                   "exact_subs": sub is not None}
-        for vid, title in found:
+                                   "exact_subs": sub is not None,
+                                   "first": vids[:2]}
+        for vid in vids:
             videos[vid] = {
-                "id": vid, "title": title, "publishedAt": "",
+                "id": vid, "title": "", "publishedAt": "",
                 "url": "https://www.youtube.com/watch?v=" + vid,
                 "channelId": cid, "duration": "",
             }
@@ -164,14 +147,20 @@ def main():
 
     views = {}
     with ThreadPoolExecutor(max_workers=6) as pool:
-        for vid, n, pub in pool.map(fetch_one, jobs):
+        for vid, n, title, pub in pool.map(fetch_one, jobs):
             if n is None or n < 0:
                 status["views_fail"] += 1
                 continue
             views[vid] = n
             status["views_ok"] += 1
+            if title:
+                videos[vid]["title"] = title
+                status["titles_ok"] += 1
             if pub:
                 videos[vid]["publishedAt"] = pub
+            if len(status["sample"]) < 4:
+                status["sample"].append({"id": vid, "views": n,
+                                         "title": title[:28]})
     if not views:
         status["error"] = "没有取得任何真实播放量，不回传"
         return
