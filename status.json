@@ -1,26 +1,63 @@
 {
- "run_at": "2026-11-10T11:24:56+08:00",
- "ok": false,
+ "run_at": "2026-11-10T11:26:15+08:00",
+ "ok": true,
  "secret_set": true,
  "channels": {
   "UC_AglC5rzoBquyI3HYWHGyQ": {
-   "videos": 0,
+   "videos": 15,
    "subscribers": 7890,
-   "exact_subs": false
+   "exact_subs": false,
+   "first": [
+    "pzSZEyvOL6M",
+    "PeSNnT69zd8"
+   ]
   },
   "UCmaMFmdJPY47IdGvCo3jSjw": {
-   "videos": 0,
+   "videos": 15,
    "subscribers": 7830,
-   "exact_subs": false
+   "exact_subs": false,
+   "first": [
+    "wJb428KbAME",
+    "058BWwToQpM"
+   ]
   },
   "UCam5YvQCGc_18jERc34XGxQ": {
-   "videos": 0,
+   "videos": 15,
    "subscribers": 3500,
-   "exact_subs": false
+   "exact_subs": false,
+   "first": [
+    "QEOnnT8DBVI",
+    "y6XvMLniBg0"
+   ]
   }
  },
- "views_ok": 0,
+ "views_ok": 45,
  "views_fail": 0,
- "push": null,
- "error": "没有取得任何真实播放量，不回传"
+ "titles_ok": 45,
+ "sample": [
+  {
+   "id": "pzSZEyvOL6M",
+   "views": 21337,
+   "title": "生產線忙到轉不停，員工直接在工位睡覺@MOONCAKEF"
+  },
+  {
+   "id": "PeSNnT69zd8",
+   "views": 28623,
+   "title": "客人比多大，老闆就切多大？這遊戲也太上頭！@debest"
+  },
+  {
+   "id": "sVbXikD85C8",
+   "views": 98275,
+   "title": "這絕對是我見過串羊肉串最快的方法@FoodNetwork"
+  },
+  {
+   "id": "pqNciLK8Y3g",
+   "views": 1706,
+   "title": "裱花師的外掛，竟然是一台投影機🎂@MomentsGang"
+  }
+ ],
+ "push": {
+  "status": 200,
+  "body": "{\"ok\": true, \"videos\": 45, \"snapshots\": 4, \"latest\": \"2026-11-10T11:00:00+08:00\"}"
+ }
 }
