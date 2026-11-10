@@ -1,7 +1,5 @@
 name: collect
 on:
-  schedule:
-    - cron: '0,30 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
@@ -32,9 +30,10 @@ jobs:
         run: python collect.py
       - name: save status
         if: always()
+        continue-on-error: true
         run: |
           git config user.name "yt-monitor[bot]"
           git config user.email "yt-monitor@users.noreply.github.com"
           git add status.json
           git diff --cached --quiet || git commit -m "status: $(date -u +%Y-%m-%dT%H:%MZ)"
-          git push
+          git push || (git pull --rebase --autostash origin main && git push)
