@@ -1,5 +1,5 @@
 {
- "run_at": "2026-11-11T04:37:50+08:00",
+ "run_at": "2026-11-11T09:56:29+08:00",
  "ok": true,
  "secret_set": true,
  "channels": {
@@ -37,27 +37,27 @@
  "sample": [
   {
    "id": "0xCDis7hj-I",
-   "views": 1954,
+   "views": 2029,
    "title": "孫女教奶奶一招剝玉米，沒想到真的這麼簡單！@bellad"
   },
   {
    "id": "aUcPA4WFIhQ",
-   "views": 1924,
+   "views": 2387,
    "title": "顧客嫌拉麵不好吃，店員的處理方式也太狠了！😂@tondo"
   },
   {
    "id": "pzSZEyvOL6M",
-   "views": 25798,
+   "views": 25935,
    "title": "生產線忙到轉不停，員工直接在工位睡覺@MOONCAKEF"
   },
   {
    "id": "PeSNnT69zd8",
-   "views": 34705,
+   "views": 34657,
    "title": "客人比多大，老闆就切多大？這遊戲也太上頭！@debest"
   }
  ],
  "push": {
   "status": 200,
-  "body": "{\"ok\": true, \"videos\": 45, \"snapshots\": 12, \"latest\": \"2026-11-11T04:30:00+08:00\"}"
+  "body": "{\"ok\": true, \"videos\": 45, \"snapshots\": 13, \"latest\": \"2026-11-11T09:30:00+08:00\"}"
  }
 }
