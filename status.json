@@ -1,5 +1,5 @@
 {
- "run_at": "2026-11-11T10:58:56+08:00",
+ "run_at": "2026-11-11T18:34:31+08:00",
  "ok": true,
  "secret_set": true,
  "channels": {
@@ -8,8 +8,8 @@
    "subscribers": 7890,
    "exact_subs": false,
    "first": [
-    "0xCDis7hj-I",
-    "aUcPA4WFIhQ"
+    "3mB4HKZDKB4",
+    "TyZ5mNjm-Lk"
    ]
   },
   "UCmaMFmdJPY47IdGvCo3jSjw": {
@@ -17,8 +17,8 @@
    "subscribers": 7830,
    "exact_subs": false,
    "first": [
-    "mFTaI4DjFDc",
-    "iBni2ZNENro"
+    "8z1eIy-vu48",
+    "LH2jXXDErXY"
    ]
   },
   "UCam5YvQCGc_18jERc34XGxQ": {
@@ -26,8 +26,8 @@
    "subscribers": 3500,
    "exact_subs": false,
    "first": [
-    "SZ9U9adW18o",
-    "KUlDSpa4Jkw"
+    "28ntPfO5knk",
+    "cEt6_kKR_9g"
    ]
   }
  },
@@ -36,28 +36,28 @@
  "titles_ok": 45,
  "sample": [
   {
+   "id": "3mB4HKZDKB4",
+   "views": 1242,
+   "title": "這家甜點店的包裝設計，竟然還能幫顧客省錢！@steele"
+  },
+  {
+   "id": "TyZ5mNjm-Lk",
+   "views": 1166,
+   "title": "一次準備11個孩子的晚餐，媽媽到底有多忙？@myra s"
+  },
+  {
    "id": "0xCDis7hj-I",
-   "views": 2107,
+   "views": 2264,
    "title": "孫女教奶奶一招剝玉米，沒想到真的這麼簡單！@bellad"
   },
   {
    "id": "aUcPA4WFIhQ",
-   "views": 2471,
+   "views": 3332,
    "title": "顧客嫌拉麵不好吃，店員的處理方式也太狠了！😂@tondo"
-  },
-  {
-   "id": "pzSZEyvOL6M",
-   "views": 25935,
-   "title": "生產線忙到轉不停，員工直接在工位睡覺@MOONCAKEF"
-  },
-  {
-   "id": "PeSNnT69zd8",
-   "views": 34666,
-   "title": "客人比多大，老闆就切多大？這遊戲也太上頭！@debest"
   }
  ],
  "push": {
   "status": 200,
-  "body": "{\"ok\": true, \"videos\": 45, \"snapshots\": 14, \"latest\": \"2026-11-11T10:30:00+08:00\"}"
+  "body": "{\"ok\": true, \"videos\": 45, \"snapshots\": 15, \"latest\": \"2026-11-11T18:30:00+08:00\"}"
  }
 }
