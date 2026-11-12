@@ -1,5 +1,5 @@
 {
- "run_at": "2026-11-12T20:00:11+08:00",
+ "run_at": "2026-11-12T20:30:26+08:00",
  "ok": true,
  "secret_set": true,
  "channels": {
@@ -34,27 +34,27 @@
  "sample": [
   {
    "id": "9yWZHX4L0JQ",
-   "views": 932,
+   "views": 1136,
    "title": "這絕對是我見過處理鮭魚最講究的師傅！@win lvc#s"
   },
   {
    "id": "6kXKcMGaVw0",
-   "views": 901,
+   "views": 1170,
    "title": "馬鈴薯冷凍後竟然變成海綿？輕輕一捏就出水！@onebit"
   },
   {
    "id": "3mB4HKZDKB4",
-   "views": 2370,
+   "views": 2410,
    "title": "這家甜點店的包裝設計，竟然還能幫顧客省錢！@steele"
   },
   {
    "id": "TyZ5mNjm-Lk",
-   "views": 1712,
+   "views": 1733,
    "title": "一次準備11個孩子的晚餐，媽媽到底有多忙？@myra s"
   }
  ],
  "push": {
   "status": 200,
-  "body": "{\"ok\": true, \"videos\": 30, \"snapshots\": 14, \"latest\": \"2026-11-12T20:00:00+08:00\"}"
+  "body": "{\"ok\": true, \"videos\": 30, \"snapshots\": 15, \"latest\": \"2026-11-12T20:30:00+08:00\"}"
  }
 }
