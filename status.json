@@ -1,5 +1,5 @@
 {
- "run_at": "2026-11-12T06:33:53+08:00",
+ "run_at": "2026-11-12T12:40:33+08:00",
  "ok": true,
  "secret_set": true,
  "channels": {
@@ -34,27 +34,27 @@
  "sample": [
   {
    "id": "3mB4HKZDKB4",
-   "views": 1973,
+   "views": 2023,
    "title": "這家甜點店的包裝設計，竟然還能幫顧客省錢！@steele"
   },
   {
    "id": "TyZ5mNjm-Lk",
-   "views": 1589,
+   "views": 1615,
    "title": "一次準備11個孩子的晚餐，媽媽到底有多忙？@myra s"
   },
   {
    "id": "0xCDis7hj-I",
-   "views": 2407,
+   "views": 2499,
    "title": "孫女教奶奶一招剝玉米，沒想到真的這麼簡單！@bellad"
   },
   {
    "id": "aUcPA4WFIhQ",
-   "views": 7318,
+   "views": 7635,
    "title": "顧客嫌拉麵不好吃，店員的處理方式也太狠了！😂@tondo"
   }
  ],
  "push": {
   "status": 200,
-  "body": "{\"ok\": true, \"videos\": 30, \"snapshots\": 14, \"latest\": \"2026-11-12T06:30:00+08:00\"}"
+  "body": "{\"ok\": true, \"videos\": 30, \"snapshots\": 15, \"latest\": \"2026-11-12T12:30:00+08:00\"}"
  }
 }
