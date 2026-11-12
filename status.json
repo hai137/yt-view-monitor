@@ -1,5 +1,5 @@
 {
- "run_at": "2026-11-12T17:14:08+08:00",
+ "run_at": "2026-11-12T18:23:48+08:00",
  "ok": true,
  "secret_set": true,
  "channels": {
@@ -8,8 +8,8 @@
    "subscribers": 7890,
    "exact_subs": false,
    "first": [
-    "3mB4HKZDKB4",
-    "TyZ5mNjm-Lk"
+    "9yWZHX4L0JQ",
+    "6kXKcMGaVw0"
    ]
   },
   "UCmaMFmdJPY47IdGvCo3jSjw": {
@@ -17,8 +17,8 @@
    "subscribers": 7830,
    "exact_subs": false,
    "first": [
-    "8z1eIy-vu48",
-    "LH2jXXDErXY"
+    "A5Oc15OQClE",
+    "iMK4oFXBrQU"
    ]
   },
   "UCam5YvQCGc_18jERc34XGxQ": {
@@ -33,28 +33,28 @@
  "titles_ok": 30,
  "sample": [
   {
+   "id": "9yWZHX4L0JQ",
+   "views": 467,
+   "title": "這絕對是我見過處理鮭魚最講究的師傅！@win lvc#s"
+  },
+  {
+   "id": "6kXKcMGaVw0",
+   "views": 525,
+   "title": "馬鈴薯冷凍後竟然變成海綿？輕輕一捏就出水！@onebit"
+  },
+  {
    "id": "3mB4HKZDKB4",
-   "views": 2067,
+   "views": 2130,
    "title": "這家甜點店的包裝設計，竟然還能幫顧客省錢！@steele"
   },
   {
    "id": "TyZ5mNjm-Lk",
-   "views": 1638,
+   "views": 1636,
    "title": "一次準備11個孩子的晚餐，媽媽到底有多忙？@myra s"
-  },
-  {
-   "id": "0xCDis7hj-I",
-   "views": 2537,
-   "title": "孫女教奶奶一招剝玉米，沒想到真的這麼簡單！@bellad"
-  },
-  {
-   "id": "aUcPA4WFIhQ",
-   "views": 8053,
-   "title": "顧客嫌拉麵不好吃，店員的處理方式也太狠了！😂@tondo"
   }
  ],
  "push": {
   "status": 200,
-  "body": "{\"ok\": true, \"videos\": 30, \"snapshots\": 12, \"latest\": \"2026-11-12T17:00:00+08:00\"}"
+  "body": "{\"ok\": true, \"videos\": 30, \"snapshots\": 13, \"latest\": \"2026-11-12T18:00:00+08:00\"}"
  }
 }
